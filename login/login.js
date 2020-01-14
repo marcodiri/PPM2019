@@ -30,7 +30,7 @@ $('#login')
                 sessionStorage.removeItem("loggedFrom");
                 window.location = pageToRestore ? pageToRestore : "../";
             }else{
-                $('#textForProblem').html("Nome o passoword errati");
+                alert("Nome o passoword errati");
             }
         }).fail(function () {
             alert('Errore');

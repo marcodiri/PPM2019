@@ -156,7 +156,7 @@ var canvas = {
         }
 
         // update info
-        $('#canvasInfo').text('Clicca l\'immagine per tornare ai dettagli');
+        $('#canvasInfo').text('Tocca l\'immagine per tornare ai dettagli');
         $('#title').html($('#title h2').html($('#name').text(detail.nome)));
         $('#description').text(detail.descrizione);
         $('#detailsList').remove();
@@ -302,7 +302,7 @@ $(window).on('load', function () {
             .html(canvas.element)
             .after($(document.createElement("span"))
                 .attr('id', 'canvasInfo')
-                .text('Clicca l\'immagine per mostrare/nascondere gli appunti')
+                .text('Tocca l\'immagine per mostrare/nascondere gli appunti')
             );
         setBoxHeight();
 
@@ -424,7 +424,7 @@ function canvasClick(e) {
             else
                 canvas.animate(0, 0, canvas.height, false, 1);
             // restore the opera info
-            $('#canvasInfo').text('Clicca l\'immagine per mostrare/nascondere i dettagli');
+            $('#canvasInfo').text('Tocca l\'immagine per mostrare/nascondere i dettagli');
             canvas.toggleDetails();
 
         }*/
