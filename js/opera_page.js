@@ -84,18 +84,20 @@ var canvas = {
 
                                 $(this).text('Torna agli appunti')
                                     .off().on('click', function (e) {
-                                        canvas.inDetail = false;
-                                        // remove an the form
-                                        var $exists = $('#form');
-                                        if ($exists.length) {
-                                            $exists.remove();
-                                        }
-                                        canvas.restore();
-                                        $(this).text('Prendi appunti')
-                                            .removeClass('endBtn')
-                                            .off().on('click', function () {
+                                        if (!$('#form').data('modified') || confirm("Tornare indietro senza salvare?")) {
+                                            canvas.inDetail = false;
+                                            // remove an the form
+                                            var $exists = $('#form');
+                                            if ($exists.length) {
+                                                $exists.remove();
+                                            }
+                                            canvas.restore();
+                                            $(this).text('Prendi appunti')
+                                                .removeClass('endBtn')
+                                                .off().on('click', function () {
                                                 startNote($(this), e);
-                                        });
+                                            });
+                                        }
                                 });
                                 showTutorial("edit_note");
                             });
@@ -327,7 +329,9 @@ function startNote($t, e) {
     canvas.enlarge();
     takeNotes();
     $t.off().on('click', function () {
-        stopNote(e, $t);
+        var $exists = $('#form');
+        if ($exists.length === 0 || confirm("Tornare indietro senza salvare?"))
+            stopNote(e, $t);
     });
 
     showTutorial("take_notes"); // wait for the operaWrap to be filled to get the correct position for tutorials
@@ -675,10 +679,10 @@ function drawInputs(detail, existingDetail, func) {
                 alert("Nome dettaglio già esistente");
             }else{
                 alert("Appunto salvato");
+                $f.remove();
+                canvas.context.clearRect(0, 0, canvas.element.width(), canvas.element.height());
+                canvas.context.drawImage($img[0], canvas.element.data('totMoveX'), 0, canvas.element.data('virtualWidth'), canvas.height);
             }
-            $f.remove();
-            canvas.context.clearRect(0, 0, canvas.element.width(), canvas.element.height());
-            canvas.context.drawImage($img[0], canvas.element.data('totMoveX'), 0, canvas.element.data('virtualWidth'), canvas.height);
         }).fail(function(e){
             console.warn(e);
             alert("Connesione fallita");
@@ -697,18 +701,18 @@ function drawInputs(detail, existingDetail, func) {
                 alert("Dettaglio "+detail.nome+" già esistente");
             } else {
                 alert("Appunto modificato");
+                $f.remove();
+                $.when(fetchDetails()).always(function () {
+                    canvas.inDetail = false;
+                    canvas.restore();
+                    $('#topBtn').text('Prendi appunti')
+                        .removeClass('endBtn')
+                        .off().on('click', function () {
+                        startNote($(this));
+                    });
+                });
             }
 
-            $f.remove();
-            $.when(fetchDetails()).always(function () {
-                canvas.inDetail = false;
-                canvas.restore();
-                $('#topBtn').text('Prendi appunti')
-                    .removeClass('endBtn')
-                    .off().on('click', function () {
-                    startNote($(this));
-                });
-            });
         }).fail(function(e){
             console.warn(e);
             alert("Connesione fallita");
@@ -725,20 +729,19 @@ function drawInputs(detail, existingDetail, func) {
 
             if(obj["deleteFromDB"] === "true"){
                 alert("Dettaglio eliminato correttamente");
+                $f.remove();
+                $.when(fetchDetails()).always(function () {
+                    canvas.inDetail = false;
+                    canvas.restore();
+                    $('#topBtn').text('Prendi appunti')
+                        .removeClass('endBtn')
+                        .off().on('click', function () {
+                        startNote($(this));
+                    });
+                });
             }else{
                 alert("Problemi nell'eliminare il dettaglio");
             }
-
-            $f.remove();
-            $.when(fetchDetails()).always(function () {
-                canvas.inDetail = false;
-                canvas.restore();
-                $('#topBtn').text('Prendi appunti')
-                    .removeClass('endBtn')
-                    .off().on('click', function () {
-                    startNote($(this));
-                });
-            });
         }).fail(function(e){
             console.warn(e);
             alert("Connesione fallita");
@@ -785,8 +788,16 @@ function drawInputs(detail, existingDetail, func) {
                 );
         } else {
             $f
-                .append('<input type="text" id="noteTitle" value="'+detail.nome+'">')
-                .append('<textarea id="noteText" rows="10">'+detail.descrizione+'</textarea>>')
+                .append($('<input type="text" id="noteTitle" value="'+detail.nome+'">')
+                    .on('focusin', function () {
+                        $('#form').data('modified', true);
+                })
+                )
+                .append($('<textarea id="noteText" rows="10">'+detail.descrizione+'</textarea>')
+                    .on('focusin', function () {
+                        $('#form').data('modified', true);
+                    })
+                )
                 .append($('<input type="button" id="noteDeleteBtn" class="noteBtn" value="Elimina">')
                     .on('click', function () {
                         deleteDetail(detail);
