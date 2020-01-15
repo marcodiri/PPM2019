@@ -804,10 +804,11 @@ function drawInputs(detail, existingDetail, func) {
                     }))
                 .append($('<input type="button" id="noteModifyBtn" class="noteBtn" value="Salva">')
                     .on('click', function () {
-                        detail.old_nome = detail.nome;
-                        detail.nome = $('#noteTitle').val();
-                        detail.descrizione = $('#noteText').val();
-                        modifyDetail(detail);
+                        var changes = $.extend(true,{}, detail); // deep copy the detail object to not affect the original
+                        changes.old_nome = detail.nome;
+                        changes.nome = $('#noteTitle').val();
+                        changes.descrizione = $('#noteText').val();
+                        modifyDetail(changes);
                     })
                 );
         }
